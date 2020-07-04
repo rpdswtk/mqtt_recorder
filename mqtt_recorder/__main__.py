@@ -52,7 +52,10 @@ def main():
         wait_for_keyboard_interrupt()
         recorder.stop_recording()
     elif args.mode == 'replay':
-        recorder.start_replay()
+        try:
+            recorder.start_replay()
+        except KeyboardInterrupt:
+            pass
     else:
         print('Please select a mode record/replay')
 
