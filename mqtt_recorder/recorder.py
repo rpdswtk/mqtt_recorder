@@ -32,19 +32,25 @@ class MqttRecorder:
         self.__recording = True
 
 
-    def start_replay(self):
+    def start_replay(self, loop: bool):
         with open(self.__file_name, newline='') as csvfile:
             logger.info('Starting replay')
             first_message = True
             reader = csv.reader(csvfile)
             messages = list(reader)
-            for row in tqdm(messages, desc='MQTT REPLAY'):
-                if not first_message:
-                    time.sleep(float(row[3]))
+            while True:
+                for row in tqdm(messages, desc='MQTT REPLAY'):
+                    if not first_message:
+                        time.sleep(float(row[3]))
+                    else:
+                        first_message = False
+                    self.__client.publish(topic=row[0], payload=row[1])
+                logger.info('End of replay')
+                if loop:
+                    logger.info('Restarting replay')
+                    time.sleep(1)
                 else:
-                    first_message = False
-                self.__client.publish(topic=row[0], payload=row[1])
-            logger.info('End of replay')
+                    break
 
 
     def stop_recording(self):

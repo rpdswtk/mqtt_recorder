@@ -35,6 +35,13 @@ parser.add_argument(
     required=True
 )
 
+parser.add_argument(
+    '--loop',
+    type=bool,
+    help='looping replay',
+    default=True
+)
+
 
 def wait_for_keyboard_interrupt():
     try:
@@ -53,7 +60,7 @@ def main():
         recorder.stop_recording()
     elif args.mode == 'replay':
         try:
-            recorder.start_replay()
+            recorder.start_replay(args.loop)
         except KeyboardInterrupt:
             pass
     else:
