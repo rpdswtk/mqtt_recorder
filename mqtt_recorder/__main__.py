@@ -11,21 +11,21 @@ parser.add_argument(
     '--host',
     type=str,
     required=True,
-    help=' MQTT broker address'
+    help='MQTT broker address'
 )
 
 parser.add_argument(
     '--port',
     type=int,
     default=1883,
-    help=' MQTT broker port'
+    help='MQTT broker port'
 )
 
 parser.add_argument(
     '--mode',
     type=str,
-    required=True,
-    help='mode: record/replay'
+    help='mode: record/replay',
+    required=True
 )
 
 parser.add_argument(
@@ -45,7 +45,14 @@ parser.add_argument(
 parser.add_argument(
     '--qos',
     type=int,
+    help='Quality of Service that will be used for subscriptions',
     default=0
+)
+
+parser.add_argument(
+    '--topics',
+    type=str,
+    help='json file containing topics to subscribe to'
 )
 
 
@@ -61,7 +68,7 @@ def main():
     args = parser.parse_args()
     recorder = MqttRecorder(args.host, args.port, args.file)
     if args.mode == 'record':
-        recorder.start_recording(qos=args.qos)
+        recorder.start_recording(qos=args.qos, topics_file=args.topics)
         wait_for_keyboard_interrupt()
         recorder.stop_recording()
     elif args.mode == 'replay':

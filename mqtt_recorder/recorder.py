@@ -2,6 +2,7 @@ import paho.mqtt.client as mqtt
 import logging
 import time
 import csv
+import json
 from tqdm import tqdm
 
 logging.basicConfig(
@@ -25,9 +26,14 @@ class MqttRecorder:
         self.__client.loop_start()
 
 
-    def start_recording(self, topics: list=[], qos: int=0):
+    def start_recording(self, topics_file: str, qos: int=0):
         self.__last_message_time = time.time()
-        if len(topics) == 0:
+        if topics_file:
+            with open(topics_file) as json_file:
+                data = json.load(json_file)
+                for topic in data['topics']:
+                    self.__client.subscribe(topic, qos=qos)
+        else:
             self.__client.subscribe('#', qos=qos)
         self.__recording = True
 
