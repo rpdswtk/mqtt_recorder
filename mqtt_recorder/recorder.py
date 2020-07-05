@@ -25,10 +25,10 @@ class MqttRecorder:
         self.__client.loop_start()
 
 
-    def start_recording(self, topics: list=[]):
+    def start_recording(self, topics: list=[], qos: int=0):
         self.__last_message_time = time.time()
         if len(topics) == 0:
-            self.__client.subscribe('#')
+            self.__client.subscribe('#', qos=qos)
         self.__recording = True
 
 
@@ -41,10 +41,12 @@ class MqttRecorder:
             while True:
                 for row in tqdm(messages, desc='MQTT REPLAY'):
                     if not first_message:
-                        time.sleep(float(row[3]))
+                        time.sleep(float(row[5]))
                     else:
                         first_message = False
-                    self.__client.publish(topic=row[0], payload=row[1])
+                    retain = False if row[3] == '0' else True
+                    self.__client.publish(topic=row[0], payload=row[1],
+                                          qos=int(row[2]), retain=retain)
                 logger.info('End of replay')
                 if loop:
                     logger.info('Restarting replay')
@@ -70,10 +72,10 @@ class MqttRecorder:
 
     def __on_message(self, client, userdata, msg):
         if self.__recording:
-            logger.info("[MQTT Message received] Topic: %s Payload: %s",
-                        msg.topic, msg.payload.decode())
+            logger.info("[MQTT Message received] Topic: %s QoS: %s Retain: %s",
+                        msg.topic, msg.qos, msg.retain)
             time_now = time.time()
             time_delta = time_now - self.__last_message_time
-            row = [msg.topic, msg.payload.decode(), time_now, time_delta]
+            row = [msg.topic, msg.payload.decode(), msg.qos, msg.retain, time_now, time_delta]
             self.__messages.append(row)
             self.__last_message_time = time_now

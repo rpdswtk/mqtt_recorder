@@ -39,7 +39,13 @@ parser.add_argument(
     '--loop',
     type=bool,
     help='looping replay',
-    default=True
+    default=False
+)
+
+parser.add_argument(
+    '--qos',
+    type=int,
+    default=0
 )
 
 
@@ -55,7 +61,7 @@ def main():
     args = parser.parse_args()
     recorder = MqttRecorder(args.host, args.port, args.file)
     if args.mode == 'record':
-        recorder.start_recording()
+        recorder.start_recording(qos=args.qos)
         wait_for_keyboard_interrupt()
         recorder.stop_recording()
     elif args.mode == 'replay':
