@@ -52,7 +52,7 @@ parser.add_argument(
 parser.add_argument(
     '--topics',
     type=str,
-    help='json file containing topics to subscribe to'
+    help='json file containing selected topics for subscriptions'
 )
 
 

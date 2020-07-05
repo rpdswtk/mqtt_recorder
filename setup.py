@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mqtt-recorder-RPDSWTK",
-    version="0.0.1",
+    version="1.0.0",
     author="RPDSWTK",
     description="MQTT recorder tool",
     long_description=long_description,
