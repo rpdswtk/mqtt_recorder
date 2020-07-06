@@ -2,6 +2,10 @@
 
 Simple cli tool for recording and replaying MQTT messages.
 
+# Install
+
+`pip install mqtt-recorder`
+
 ## Usage
 |  Argument  |                       Description                      | Required | Default |
 |:----------:|:------------------------------------------------------:|----------|:-------:|
