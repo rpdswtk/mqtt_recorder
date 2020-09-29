@@ -1,4 +1,4 @@
-from mqtt_recorder.recorder import MqttRecorder
+from mqtt_recorder.recorder import MqttRecorder, SslContext
 import argparse
 import time
 
@@ -19,6 +19,55 @@ parser.add_argument(
     type=int,
     default=1883,
     help='MQTT broker port'
+)
+
+parser.add_argument(
+    '--username',
+    type=str,
+    default=None,
+    required=False,
+    help='MQTT broker username'
+)
+
+parser.add_argument(
+    '--password',
+    type=str,
+    default=None,
+    required=False,
+    help='MQTT broker password'
+)
+
+parser.add_argument(
+    '--enable_ssl',
+    type=bool,
+    default=False,
+    required=False,
+    help='True to enable MQTTs support, False otherwise'
+)
+
+parser.add_argument(
+    '--ca_cert',
+    type=str,
+    default=None,
+    required=False,
+    help='path to the Certificate Authority certificate files'
+)
+
+parser.add_argument(
+    '--certfile',
+    type=str,
+    default=None,
+    required=False,
+    help='path to the client certificate'
+)
+
+parser.add_argument(
+    '--keyfile',
+    type=str,
+    default=None,
+    required=False,
+    help='path to the client private key'
+
 )
 
 parser.add_argument(
@@ -66,7 +115,8 @@ def wait_for_keyboard_interrupt():
 
 def main():
     args = parser.parse_args()
-    recorder = MqttRecorder(args.host, args.port, args.file)
+    sslContext = SslContext(args.enable_ssl, args.ca_cert, args.certfile, args.keyfile)
+    recorder = MqttRecorder(args.host, args.port, args.file, args.username, args.password, sslContext)
     if args.mode == 'record':
         recorder.start_recording(qos=args.qos, topics_file=args.topics)
         wait_for_keyboard_interrupt()
