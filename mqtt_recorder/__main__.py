@@ -72,7 +72,7 @@ parser.add_argument(
 
 parser.add_argument(
     '--mode',
-    type=str,
+    choices=["record", "replay"],
     help='mode: record/replay',
     required=True
 )
@@ -104,6 +104,14 @@ parser.add_argument(
     help='json file containing selected topics for subscriptions'
 )
 
+parser.add_argument(
+    '--encode_b64',
+    default=False,
+    action='store_true',
+    help='Store raw data as base64 encoded string in CSV file instead of UTF-8 encoded string. '
+         'Should be used to record binary message payloads'
+)
+
 
 def wait_for_keyboard_interrupt():
     try:
@@ -116,7 +124,14 @@ def wait_for_keyboard_interrupt():
 def main():
     args = parser.parse_args()
     sslContext = SslContext(args.enable_ssl, args.ca_cert, args.certfile, args.keyfile)
-    recorder = MqttRecorder(args.host, args.port, args.file, args.username, args.password, sslContext)
+    recorder = MqttRecorder(
+        args.host,
+        args.port,
+        args.file,
+        args.username,
+        args.password,
+        sslContext,
+        args.encode_b64)
     if args.mode == 'record':
         recorder.start_recording(qos=args.qos, topics_file=args.topics)
         wait_for_keyboard_interrupt()
