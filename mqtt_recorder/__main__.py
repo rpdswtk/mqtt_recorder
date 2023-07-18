@@ -22,6 +22,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--client_id',
+    type=str,
+    default=None,
+    required=False,
+    help='MQTT Client ID'
+)
+
+
+parser.add_argument(
     '--username',
     type=str,
     default=None,
@@ -43,6 +52,14 @@ parser.add_argument(
     default=False,
     required=False,
     help='True to enable MQTTs support, False otherwise'
+)
+
+parser.add_argument(
+    '--tls_insecure',
+    type=bool,
+    default=False,
+    required=False,
+    help='If certs is self-generated, change to True'
 )
 
 parser.add_argument(
@@ -123,10 +140,11 @@ def wait_for_keyboard_interrupt():
 
 def main():
     args = parser.parse_args()
-    sslContext = SslContext(args.enable_ssl, args.ca_cert, args.certfile, args.keyfile)
+    sslContext = SslContext(args.enable_ssl, args.ca_cert, args.certfile, args.keyfile, args.tls_insecure)
     recorder = MqttRecorder(
         args.host,
         args.port,
+        args.client_id,
         args.file,
         args.username,
         args.password,
