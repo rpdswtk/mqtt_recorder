@@ -14,30 +14,32 @@ logger = logging.getLogger('MQTTRecorder')
 
 class SslContext():
 
-    def __init__(self, enable, ca_cert, certfile, keyfile):
+    def __init__(self, enable, ca_cert, certfile, keyfile, tls_insecure):
         self.enable = enable
         self.ca_cert = ca_cert
         self.certfile = certfile
         self.keyfile = keyfile
+        self.tls_insecure = tls_insecure
 
 
 class MqttRecorder:
 
-    def __init__(self, host: str, port: int, file_name: str, username: str,
+    def __init__(self, host: str, port: int, client_id: str, file_name: str, username: str,
                  password: str, sslContext: SslContext, encode_b64: bool):
         self.__recording = False
         self.__messages = list()
         self.__file_name = file_name
         self.__last_message_time = None
         self.__encode_b64 = encode_b64
-        self.__client = mqtt.Client()
+        self.__client = mqtt.Client(client_id=client_id)
         self.__client.on_connect = self.__on_connect
         self.__client.on_message = self.__on_message
         if username is not None:
             self.__client.username_pw_set(username, password)
         if sslContext.enable:
             self.__client.tls_set(sslContext.ca_cert, sslContext.certfile, sslContext.keyfile)
-        
+            if sslContext.tls_insecure is True:
+                self.__client.tls_insecure_set(True)
         self.__client.connect(host=host, port=port)
         self.__client.loop_start()
 
