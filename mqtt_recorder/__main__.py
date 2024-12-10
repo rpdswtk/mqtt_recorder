@@ -131,7 +131,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--csv-field-size-limit',
+    '--csv_field_size_limit',
     default=None,
     type=int,
     help='Set csv.field_size_limit(VALUE)'
