@@ -1,6 +1,7 @@
 from mqtt_recorder.recorder import MqttRecorder, SslContext
 import argparse
 import time
+import json
 
 parser = argparse.ArgumentParser(
     prog='mqtt_recorder',
@@ -122,13 +123,21 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--topic',
+    '-t',
+    type=str,
+    default=None,
+    help='Single topic to subscribe to.'
+         'Alternative to --topics topics_file.'
+)
+
+parser.add_argument(
     '--encode_b64',
     default=False,
     action='store_true',
     help='Store raw data as base64 encoded string in CSV file instead of UTF-8 encoded string. '
          'Should be used to record binary message payloads'
 )
-
 
 def wait_for_keyboard_interrupt():
     try:
@@ -151,7 +160,14 @@ def main():
         sslContext,
         args.encode_b64)
     if args.mode == 'record':
-        recorder.start_recording(qos=args.qos, topics_file=args.topics)
+        topics = []
+        if args.topics:
+            with open(args.topics) as json_file:
+                data = json.load(json_file)
+                topics = data['topics']
+        elif args.topic:
+            topics = [args.topic]
+        recorder.start_recording(topics, qos=args.qos)
         wait_for_keyboard_interrupt()
         recorder.stop_recording()
     elif args.mode == 'replay':
