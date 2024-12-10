@@ -71,7 +71,7 @@ class MqttRecorder:
                     else:
                         first_message = False
                     mqtt_payload = decode_payload(row[1], self.__encode_b64)
-                    retain = False if row[3] == '0' else True
+                    retain = False if row[3] == 'False' else True
                     self.__client.publish(topic=row[0], payload=mqtt_payload,
                                           qos=int(row[2]), retain=retain)
                 logger.info('End of replay')
