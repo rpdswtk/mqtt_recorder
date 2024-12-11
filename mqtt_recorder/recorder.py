@@ -1,5 +1,7 @@
 import paho.mqtt.client as mqtt
+import threading
 import logging
+import queue
 import time
 import base64
 import csv
@@ -27,13 +29,14 @@ class MqttRecorder:
     def __init__(self, host: str, port: int, client_id: str, file_name: str, username: str,
                  password: str, sslContext: SslContext, encode_b64: bool):
         self.__recording = False
-        self.__messages = list()
+        self.__messages = queue.Queue()
         self.__file_name = file_name
         self.__last_message_time = None
         self.__encode_b64 = encode_b64
         self.__client = mqtt.Client(client_id=client_id)
         self.__client.on_connect = self.__on_connect
         self.__client.on_message = self.__on_message
+        self.__csv_writer_t = None
         if username is not None:
             self.__client.username_pw_set(username, password)
         if sslContext.enable:
@@ -43,8 +46,20 @@ class MqttRecorder:
         self.__client.connect(host=host, port=port)
         self.__client.loop_start()
 
+    def __csv_writer(self):
+        logger.info('Saving messages to output file')
+        with open(self.__file_name, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            while True:
+                row = self.__messages.get()
+                if not row:
+                    break
+                writer.writerow(row)
 
     def start_recording(self, topics_file: str, qos: int=0):
+        self.__csv_writer_t = threading.Thread(target=self.__csv_writer)
+        self.__csv_writer_t.daemon = True
+        self.__csv_writer_t.start()
         self.__last_message_time = time.time()
         if topics_file:
             with open(topics_file) as json_file:
@@ -86,11 +101,8 @@ class MqttRecorder:
         self.__client.loop_stop()
         logger.info('Recording stopped')
         self.__recording = False
-        logger.info('Saving messages to output file')
-        with open(self.__file_name, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            for message in self.__messages:
-                writer.writerow(message)
+        self.__messages.put([])
+        self.__csv_writer_t.join()
 
 
     def __on_connect(self, client, userdata, flags, rc):
@@ -108,5 +120,5 @@ class MqttRecorder:
             time_delta = time_now - self.__last_message_time
             payload = encode_payload(msg.payload, self.__encode_b64)
             row = [msg.topic, payload, msg.qos, msg.retain, time_now, time_delta]
-            self.__messages.append(row)
+            self.__messages.put(row)
             self.__last_message_time = time_now
