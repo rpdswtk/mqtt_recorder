@@ -18,7 +18,7 @@ Simple cli tool for recording and replaying MQTT messages.
 | --loop                 | looping replay                                           |          | false   |
 | --qos                  | Quality of Service that will be used for subscriptions   |          | 0       |
 | --topics               | json file containing selected topics for subscriptions   |          | null    |
-| --topic/-t             | Single topic to subscribe to                             |          | null    |
+| -t, --topic             | Single topic to subscribe to                             |          | null    |
 | --enable_ssl           | True to enable MQTTs support, False otherwise            |          | False   |
 | --tls_insecure         | If certs is self-generated, change to True               |          | False   |
 | --ca_cert              | Path to the Certificate Authority certificate files      |          | None    |
