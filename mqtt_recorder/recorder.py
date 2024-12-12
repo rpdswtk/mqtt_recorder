@@ -48,7 +48,7 @@ class MqttRecorder:
 
     def __csv_writer(self):
         logger.info('Saving messages to output file')
-        with open(self.__file_name, 'w', newline='') as csvfile:
+        with open(self.__file_name, 'w', newline='', buffering=1) as csvfile:
             writer = csv.writer(csvfile)
             while True:
                 row = self.__messages.get()
