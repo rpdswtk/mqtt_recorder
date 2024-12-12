@@ -5,7 +5,6 @@ import queue
 import time
 import base64
 import csv
-import json
 from tqdm import tqdm
 
 logging.basicConfig(
@@ -56,16 +55,14 @@ class MqttRecorder:
                     break
                 writer.writerow(row)
 
-    def start_recording(self, topics_file: str, qos: int=0):
+    def start_recording(self, topics: list, qos: int=0):
         self.__csv_writer_t = threading.Thread(target=self.__csv_writer)
         self.__csv_writer_t.daemon = True
         self.__csv_writer_t.start()
         self.__last_message_time = time.time()
-        if topics_file:
-            with open(topics_file) as json_file:
-                data = json.load(json_file)
-                for topic in data['topics']:
-                    self.__client.subscribe(topic, qos=qos)
+        if type(topics) is list and len(topics) > 0:
+            for topic in topics:
+                self.__client.subscribe(topic, qos=qos)
         else:
             self.__client.subscribe('#', qos=qos)
         self.__recording = True
@@ -86,7 +83,7 @@ class MqttRecorder:
                     else:
                         first_message = False
                     mqtt_payload = decode_payload(row[1], self.__encode_b64)
-                    retain = False if row[3] == '0' else True
+                    retain = False if row[3] == 'False' else True
                     self.__client.publish(topic=row[0], payload=mqtt_payload,
                                           qos=int(row[2]), retain=retain)
                 logger.info('End of replay')
