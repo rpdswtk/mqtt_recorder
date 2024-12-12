@@ -1,6 +1,7 @@
 from mqtt_recorder.recorder import MqttRecorder, SslContext
 import argparse
 import time
+import csv
 
 parser = argparse.ArgumentParser(
     prog='mqtt_recorder',
@@ -129,6 +130,12 @@ parser.add_argument(
          'Should be used to record binary message payloads'
 )
 
+parser.add_argument(
+    '--csv_field_size_limit',
+    default=None,
+    type=int,
+    help='Set csv.field_size_limit(VALUE)'
+)
 
 def wait_for_keyboard_interrupt():
     try:
@@ -140,6 +147,8 @@ def wait_for_keyboard_interrupt():
 
 def main():
     args = parser.parse_args()
+    if args.csv_field_size_limit and args.csv_field_size_limit > 0:
+        csv.field_size_limit(args.csv_field_size_limit)
     sslContext = SslContext(args.enable_ssl, args.ca_cert, args.certfile, args.keyfile, args.tls_insecure)
     recorder = MqttRecorder(
         args.host,
