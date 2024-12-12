@@ -26,7 +26,7 @@ Simple cli tool for recording and replaying MQTT messages.
 | --username             | MQTT broker username                                     |          | None    |
 | --password             | MQTT broker password                                     |          | None    |
 | --encode_b64           | True to store message payloads as base64 encoded strings |          | False   |
-| --csv_field_size_limit | True to store message payloads as base64 encoded strings |          | False   |
+| --csv_field_size_limit | CSV field size limit |          | False   |
 
 
 ### Recording
