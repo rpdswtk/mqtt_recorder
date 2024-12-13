@@ -32,7 +32,7 @@ class MqttRecorder:
         self.__file_name = file_name
         self.__last_message_time = None
         self.__encode_b64 = encode_b64
-        self.__client = mqtt.Client(client_id=client_id)
+        self.__client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id=client_id)
         self.__client.on_connect = self.__on_connect
         self.__client.on_message = self.__on_message
         self.__csv_writer_t = None

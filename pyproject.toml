@@ -11,7 +11,7 @@ authors = [{ name = "RPDSWTK" }]
 license = { file = "LICENSE" }
 keywords = ["feed", "reader", "tutorial"]
 dependencies = [
-    "paho-mqtt >= 1.6.1",
+    "paho-mqtt >= 2.0.0",
     "tqdm >= 4.65.0",
 ]
 requires-python = ">=3.7"
