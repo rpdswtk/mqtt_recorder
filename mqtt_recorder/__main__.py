@@ -1,3 +1,5 @@
+import sys
+import importlib.util
 from mqtt_recorder.recorder import MqttRecorder, SslContext
 import argparse
 import time
@@ -147,6 +149,13 @@ parser.add_argument(
     help='Set csv.field_size_limit(VALUE)'
 )
 
+parser.add_argument(
+    '--transformer',
+    default=None,
+    type=str,
+    help='.py script with `def transform(payload: bytes) -> Optional[bytes]` for each payload'
+)
+
 def wait_for_keyboard_interrupt():
     try:
         while True:
@@ -172,7 +181,7 @@ def main():
     if args.mode == 'record':
         topics = []
         if args.topics:
-            with open(args.topics) as json_file:
+            with open(args.topics, encoding="utf-8") as json_file:
                 data = json.load(json_file)
                 topics = data['topics']
         elif args.topic:
@@ -181,8 +190,23 @@ def main():
         wait_for_keyboard_interrupt()
         recorder.stop_recording()
     elif args.mode == 'replay':
+        transform = None
+        if isinstance(args.transformer, str):
+            try:
+                module_name = "transformer"
+                spec = importlib.util.spec_from_file_location(module_name, args.transformer)
+                transformer = importlib.util.module_from_spec(spec)
+                sys.modules[module_name] = transformer
+                spec.loader.exec_module(transformer)
+                transform = transformer.transform
+            except FileNotFoundError:
+                print(f"Missing {args.transformer}", file=sys.stderr)
+                return
+            except AttributeError:
+                print(f"Missing transform(payload) from {args.transformer}", file=sys.stderr)
+                return
         try:
-            recorder.start_replay(args.loop)
+            recorder.start_replay(args.loop, transform)
         except KeyboardInterrupt:
             pass
     else:

@@ -8,7 +8,7 @@ import csv
 from tqdm import tqdm
 
 logging.basicConfig(
-    level=logging.DEBUG, 
+    level=logging.DEBUG,
     format='[%(asctime)s] - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger('MQTTRecorder')
@@ -47,7 +47,7 @@ class MqttRecorder:
 
     def __csv_writer(self):
         logger.info('Saving messages to output file')
-        with open(self.__file_name, 'w', newline='', buffering=1) as csvfile:
+        with open(self.__file_name, 'w', newline='', buffering=1, encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             while True:
                 row = self.__messages.get()
@@ -60,18 +60,18 @@ class MqttRecorder:
         self.__csv_writer_t.daemon = True
         self.__csv_writer_t.start()
         self.__last_message_time = time.time()
-        if type(topics) is list and len(topics) > 0:
+        if isinstance(topics, list) and len(topics) > 0:
             for topic in topics:
                 self.__client.subscribe(topic, qos=qos)
         else:
             self.__client.subscribe('#', qos=qos)
         self.__recording = True
 
-    def start_replay(self, loop: bool):
+    def start_replay(self, loop: bool, transform):
         def decode_payload(payload, encode_b64):
             return base64.b64decode(payload) if encode_b64 else payload
 
-        with open(self.__file_name, newline='') as csvfile:
+        with open(self.__file_name, newline='', encoding='utf-8') as csvfile:
             logger.info('Starting replay')
             first_message = True
             reader = csv.reader(csvfile)
@@ -83,7 +83,11 @@ class MqttRecorder:
                     else:
                         first_message = False
                     mqtt_payload = decode_payload(row[1], self.__encode_b64)
-                    retain = False if row[3] == 'False' else True
+                    if transform:
+                        mqtt_payload = transform(mqtt_payload)
+                        if not mqtt_payload:
+                            continue
+                    retain = not row[3] == 'False'
                     self.__client.publish(topic=row[0], payload=mqtt_payload,
                                           qos=int(row[2]), retain=retain)
                 logger.info('End of replay')

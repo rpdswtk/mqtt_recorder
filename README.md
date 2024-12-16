@@ -28,6 +28,7 @@ Simple cli tool for recording and replaying MQTT messages.
 | --password             | MQTT broker password                                     |          | None    |
 | --encode_b64           | True to store message payloads as base64 encoded strings |          | False   |
 | --csv_field_size_limit | CSV field size limit                                     |          | False   |
+| --transformer          | .py script with `def transform(payload: bytes) -> Optional[bytes]` for each payload |          | None |
 
 ### Recording
 #### Subscribing to every topic
@@ -46,3 +47,25 @@ Example
 ```
 ### Replaying
 `mqtt-recorder --host localhost --mode replay --file test.csv`
+
+**With transformer:**
+
+> `transform(bytes) -> bytes|None`, if None is returned, filter payload out.
+
+`mqtt-recorder --host localhost --mode replay --file test.csv --transformer transformer.py`
+
+where transformer.py:
+
+```py
+"""
+Prepend unix_timestamp, to every message received
+"""
+
+import time
+
+def transform(payload):
+    ts = int(time.time())
+    newpay = bytearray(f"{ts},", encoding="utf-8")
+    newpay.extend(payload)
+    return newpay
+```
