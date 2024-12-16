@@ -75,9 +75,8 @@ class MqttRecorder:
             logger.info('Starting replay')
             first_message = True
             reader = csv.reader(csvfile)
-            messages = list(reader)
             while True:
-                for row in tqdm(messages, desc='MQTT REPLAY'):
+                for row in tqdm(reader, desc='MQTT REPLAY'):
                     if not first_message:
                         time.sleep(float(row[5]))
                     else:
