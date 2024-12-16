@@ -67,7 +67,7 @@ class MqttRecorder:
             self.__client.subscribe('#', qos=qos)
         self.__recording = True
 
-    def start_replay(self, loop: bool):
+    def start_replay(self, loop: bool, transform):
         def decode_payload(payload, encode_b64):
             return base64.b64decode(payload) if encode_b64 else payload
 
@@ -83,6 +83,10 @@ class MqttRecorder:
                     else:
                         first_message = False
                     mqtt_payload = decode_payload(row[1], self.__encode_b64)
+                    if transform:
+                        mqtt_payload = transform(mqtt_payload)
+                        if not mqtt_payload:
+                            continue
                     retain = not row[3] == 'False'
                     self.__client.publish(topic=row[0], payload=mqtt_payload,
                                           qos=int(row[2]), retain=retain)
