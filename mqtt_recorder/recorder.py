@@ -71,8 +71,10 @@ class MqttRecorder:
         def decode_payload(payload, encode_b64):
             return base64.b64decode(payload) if encode_b64 else payload
 
+        logger.info(f"{self.__file_name}: counting lines")
         with open(self.__file_name, newline='') as csvfile:
             csv_lines = sum(1 for line in csvfile)
+            logger.info(f"{self.__file_name}: {csv_lines} lines")
 
         with open(self.__file_name, newline='') as csvfile:
             logger.info('Starting replay')
