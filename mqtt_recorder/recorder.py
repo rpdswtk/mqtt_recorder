@@ -72,11 +72,14 @@ class MqttRecorder:
             return base64.b64decode(payload) if encode_b64 else payload
 
         with open(self.__file_name, newline='') as csvfile:
+            csv_lines = sum(1 for line in csvfile)
+
+        with open(self.__file_name, newline='') as csvfile:
             logger.info('Starting replay')
             first_message = True
             reader = csv.reader(csvfile)
             while True:
-                for row in tqdm(reader, desc='MQTT REPLAY'):
+                for row in tqdm(reader, total=csv_lines, desc='MQTT REPLAY'):
                     if not first_message:
                         time.sleep(float(row[5]))
                     else:
