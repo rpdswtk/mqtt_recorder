@@ -172,7 +172,7 @@ def main():
     if args.mode == 'record':
         topics = []
         if args.topics:
-            with open(args.topics) as json_file:
+            with open(args.topics, encoding="utf-8") as json_file:
                 data = json.load(json_file)
                 topics = data['topics']
         elif args.topic:
