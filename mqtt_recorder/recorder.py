@@ -26,7 +26,7 @@ class SslContext():
 class MqttRecorder:
 
     def __init__(self, host: str, port: int, client_id: str, file_name: str, username: str,
-                 password: str, sslContext: SslContext, encode_b64: bool):
+                 password: str, sslContext: SslContext, encode_b64: bool, delimiter: str):
         self.__recording = False
         self.__messages = queue.Queue()
         self.__file_name = file_name
@@ -36,6 +36,7 @@ class MqttRecorder:
         self.__client.on_connect = self.__on_connect
         self.__client.on_message = self.__on_message
         self.__csv_writer_t = None
+        self.__delimiter = delimiter
         if username is not None:
             self.__client.username_pw_set(username, password)
         if sslContext.enable:
@@ -48,7 +49,7 @@ class MqttRecorder:
     def __csv_writer(self):
         logger.info('Saving messages to output file')
         with open(self.__file_name, 'w', newline='', buffering=1) as csvfile:
-            writer = csv.writer(csvfile)
+            writer = csv.writer(csvfile, delimiter=self.__delimiter)
             while True:
                 row = self.__messages.get()
                 if not row:

@@ -147,6 +147,13 @@ parser.add_argument(
     help='Set csv.field_size_limit(VALUE)'
 )
 
+parser.add_argument(
+    '--delimiter',
+    default=',',
+    type=str,
+    help='Optionally provide a delimiter to use in the CSV-file instead of comma.'
+)
+
 def wait_for_keyboard_interrupt():
     try:
         while True:
@@ -168,7 +175,8 @@ def main():
         args.username,
         args.password,
         sslContext,
-        args.encode_b64)
+        args.encode_b64,
+        args.delimiter)
     if args.mode == 'record':
         topics = []
         if args.topics:
