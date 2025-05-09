@@ -80,7 +80,7 @@ class MqttRecorder:
         with open(self.__file_name, newline='') as csvfile:
             logger.info('Starting replay')
             first_message = True
-            reader = csv.reader(csvfile)
+            reader = csv.reader(csvfile, delimiter=self.__delimiter)
             while True:
                 for row in tqdm(reader, total=csv_lines, desc='MQTT REPLAY'):
                     if not first_message:
