@@ -169,20 +169,20 @@ def main():
         args.password,
         sslContext,
         args.encode_b64)
+    topics = []
+    if args.topics:
+        with open(args.topics) as json_file:
+            data = json.load(json_file)
+            topics = data['topics']
+    elif args.topic:
+        topics = [args.topic]
     if args.mode == 'record':
-        topics = []
-        if args.topics:
-            with open(args.topics) as json_file:
-                data = json.load(json_file)
-                topics = data['topics']
-        elif args.topic:
-            topics = [args.topic]
         recorder.start_recording(topics, qos=args.qos)
         wait_for_keyboard_interrupt()
         recorder.stop_recording()
     elif args.mode == 'replay':
         try:
-            recorder.start_replay(args.loop)
+            recorder.start_replay(args.loop,topics)
         except KeyboardInterrupt:
             pass
     else:
