@@ -1,5 +1,6 @@
 from mqtt_recorder.recorder import MqttRecorder, SslContext
 import argparse
+import math
 import time
 import json
 import csv
@@ -111,6 +112,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--speed',
+    type=float,
+    default=1.0,
+    help='Playback speed factor for replay. '
+         '2 replays at double speed, 0.5 at half speed'
+)
+
+parser.add_argument(
     '--qos',
     type=int,
     help='Quality of Service that will be used for subscriptions',
@@ -157,6 +166,8 @@ def wait_for_keyboard_interrupt():
 
 def main():
     args = parser.parse_args()
+    if not math.isfinite(args.speed) or args.speed <= 0:
+        parser.error('--speed must be a finite number greater than 0')
     if args.csv_field_size_limit and args.csv_field_size_limit > 0:
         csv.field_size_limit(args.csv_field_size_limit)
     sslContext = SslContext(args.enable_ssl, args.ca_cert, args.certfile, args.keyfile, args.tls_insecure)
@@ -182,7 +193,7 @@ def main():
         recorder.stop_recording()
     elif args.mode == 'replay':
         try:
-            recorder.start_replay(args.loop)
+            recorder.start_replay(args.loop, args.speed)
         except KeyboardInterrupt:
             pass
     else:

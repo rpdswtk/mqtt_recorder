@@ -16,6 +16,7 @@ Simple cli tool for recording and replaying MQTT messages.
 | --mode                 | mode: record/replay                                      | x        |         |
 | --file                 | output/input csv file                                    | x        |         |
 | --loop                 | looping replay                                           |          | false   |
+| --speed                | playback speed factor for replay (2 = double speed)      |          | 1.0     |
 | --qos                  | Quality of Service that will be used for subscriptions   |          | 0       |
 | --topics               | json file containing selected topics for subscriptions   |          | null    |
 | -t, --topic             | Single topic to subscribe to                             |          | null    |
@@ -46,3 +47,5 @@ Example
 ```
 ### Replaying
 `mqtt-recorder --host localhost --mode replay --file test.csv`
+#### Replaying at double speed
+`mqtt-recorder --host localhost --mode replay --file test.csv --speed 2`
